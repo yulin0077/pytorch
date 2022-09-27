@@ -11423,7 +11423,7 @@ op_db: List[OpInfo] = [
            assert_jit_shape_analysis=False,
            dtypes=floating_types(),
            dtypesIfCUDA=floating_types_and(torch.float16),
-           sample_inputs_func=sample_inputs_max_unpool,
+           sample_inputs_func=sample_inputs_max_unpool_grad,
            skips=(
                # Gradients are tested in `variant_test_name=grad` below.
                # We skip tests here because there is non-determinism in backward
@@ -11457,7 +11457,7 @@ op_db: List[OpInfo] = [
            assert_jit_shape_analysis=False,
            dtypes=floating_types(),
            dtypesIfCUDA=floating_types_and(torch.float16),
-           sample_inputs_func=sample_inputs_max_unpool,
+           sample_inputs_func=sample_inputs_max_unpool_grad,
            skips=(
                # Gradients are tested in `variant_test_name=grad` below.
                # We skip tests here because there is non-determinism in backward
@@ -11494,7 +11494,7 @@ op_db: List[OpInfo] = [
            assert_jit_shape_analysis=False,
            dtypes=floating_types(),
            dtypesIfCUDA=floating_types_and(torch.float16),
-           sample_inputs_func=sample_inputs_max_unpool,
+           sample_inputs_func=sample_inputs_max_unpool_grad,
            skips=(
                # Gradients are tested in `variant_test_name=grad` below.
                # We skip tests here because there is non-determinism in backward
