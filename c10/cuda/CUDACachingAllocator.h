@@ -138,6 +138,7 @@ enum struct AllocatorBackend : uint8_t {
 };
 
 C10_CUDA_API AllocatorBackend allocatorBackend();
+C10_CUDA_API void setAllocatorSettings(const std::string& env);
 
 // Size pretty-printer
 std::string format_size(uint64_t size);
@@ -151,7 +152,6 @@ std::string format_size(uint64_t size);
   _(C10_CUDA_API Allocator*, get, ())                                          \
   _(C10_CUDA_API void, init, (int device_count))                               \
   _(C10_CUDA_API void, setMemoryFraction, (double fraction, int device))       \
-  _(C10_CUDA_API void, setAllocatorSettings(const std::string& env))           \
   _(C10_CUDA_API void, emptyCache, ())                                         \
   _(C10_CUDA_API void, cacheInfo, (int dev_id, size_t* largestBlock))          \
   _(C10_CUDA_API void*, getBaseAllocation, (void* ptr, size_t* size))          \
@@ -208,10 +208,6 @@ inline void setMemoryFraction(double fraction, int device) {
   return Chosen::setMemoryFraction(fraction, device);
 }
 
-inline void setAllocatorSettings(const std::string& env) {
-  return Chosen::setAllocatorSettings(env);
-}
-
 inline void emptyCache() {
   return Chosen::emptyCache();
 }
@@ -243,7 +239,6 @@ inline void resetPeakStats(int device) {
 inline std::vector<SegmentInfo> snapshot() {
   return Chosen::snapshot();
 }
->>>>>>> squash
 
 // CUDAGraph interactions
 inline void notifyCaptureBegin(

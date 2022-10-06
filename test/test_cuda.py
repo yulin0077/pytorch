@@ -3452,8 +3452,11 @@ torch.cuda.synchronize()
                 else:
                     getattr(dummy, op)(*args)
 
-                t1.copy_(alloc)
-                t2.copy_(alloc)
+                # see above comment on TEST_CUDAMALLOCASYNC
+                if not TEST_CUDAMALLOCASYNC:
+                    t1.copy_(alloc)
+                    t2.copy_(alloc)
+
                 # Runs RNG ops that fill t1 and t2.
                 g.replay()
 
@@ -4684,7 +4687,7 @@ class TestCudaComm(TestCase):
         finally:
             torch.cuda.memory._record_memory_history(False)
 
-
+    @unittest.skipIf(TEST_CUDAMALLOCASYNC, "setContextRecorder not supported by CUDAMallocAsync")
     def test_memory_snapshot_with_cpp(self):
         try:
             torch.cuda.memory.empty_cache()
@@ -4720,7 +4723,7 @@ class TestCudaComm(TestCase):
             return ret
 
         torch.cuda.memory.empty_cache()
-        key = 'active_bytes.all.allocated'
+        key = 'active_bytes.all.allocated' if not TEST_CUDAMALLOCASYNC else 'allocated_bytes.all.current'
 
         nelems = 21 * 1024 * 1024
         nbytes = 4 * nelems  # floats are 4 bytes
@@ -4736,7 +4739,9 @@ class TestCudaComm(TestCase):
         pow2_div4_mem = torch.cuda.memory_stats()[key]
 
         self.assertTrue(reg_mem - start_mem == nbytes)
-        self.assertTrue(pow2_div4_mem - reg_mem == power2_div(nbytes, 4))
+        if not TEST_CUDAMALLOCASYNC:
+            # not supported with the cudaMallocAsync backend
+            self.assertTrue(pow2_div4_mem - reg_mem == power2_div(nbytes, 4))
 
         torch.cuda.memory._set_allocator_settings("garbage_collection_threshold:0.5")
         torch.cuda.memory._set_allocator_settings("garbage_collection_threshold:0.5,max_split_size_mb:40")
@@ -4764,6 +4769,7 @@ class TestCudaComm(TestCase):
             torch.empty(1024 * 1024 * 1024 * 1024, device='cuda')
 
     @unittest.skipIf(IS_WINDOWS, 'Windows CI does not like the load_inline')
+    @unittest.skipIf(TEST_CUDAMALLOCASYNC, "setContextRecorder not supported by CUDAMallocAsync")
     def test_cpp_memory_snapshot_pickle(self):
         from torch.utils.cpp_extension import load_inline
         source = """

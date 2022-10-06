@@ -504,13 +504,13 @@ class CachingAllocatorConfig {
     return *s_instance;
   }
 
-<<<<<<< HEAD
   void parseArgs(const char* env) {
     // If empty, set the default values
     m_max_split_size = std::numeric_limits<size_t>::max();
     m_roundup_power2_divisions = 0;
     m_roundup_bypass_threshold = std::numeric_limits<size_t>::max();
     m_garbage_collection_threshold = 0;
+    m_allocator_backend = AllocatorBackend::NATIVE;
 
     if (env == nullptr) {
       return;
@@ -627,6 +627,7 @@ class CachingAllocatorConfig {
   std::atomic<size_t> m_roundup_power2_divisions;
   std::atomic<size_t> m_roundup_bypass_threshold;
   std::atomic<double> m_garbage_collection_threshold;
+  AllocatorBackend m_allocator_backend;
 };
 
 namespace Native {
@@ -1983,10 +1984,6 @@ void setContextRecorder(CreateContextFn recorder) {
   caching_allocator.setContextRecorder(std::move(recorder));
 }
 
-void setAllocatorSettings(const std::string& env) {
-  CachingAllocatorConfig::instance().parseArgs(env.c_str());
-}
-
 void emptyCache(void) {
   caching_allocator.emptyCache();
 }
@@ -2148,6 +2145,10 @@ std::shared_ptr<void> getIpcDevPtr(std::string handle) {
 // CachingAllocatorConfig itself in CUDACachingAllocator.h.
 AllocatorBackend allocatorBackend() {
   return CachingAllocatorConfig::allocator_backend();
+}
+
+void setAllocatorSettings(const std::string& env) {
+  CachingAllocatorConfig::instance().parseArgs(env.c_str());
 }
 
 // Size pretty-printer
